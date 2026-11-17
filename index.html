@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cibersegurança — Caneta Azul</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1747d6;--ink2:#0b2a8f;--paper:#fdfcf6;--line:#c3d6f3;--margin:#e8838b;--desk:#14213d;--red:#e5484d;--green:#1f9d62}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:radial-gradient(circle at 30% 20%,#22386b,var(--desk) 70%);font-family:'Nunito',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;overflow:hidden;color:#18233f}
+.book{width:min(96vw,calc((100vh - 104px)*16/9));aspect-ratio:16/9;position:relative;perspective:2600px;container-type:inline-size}
+.page{position:absolute;inset:0;display:none;transform-origin:left center;backface-visibility:hidden;border-radius:.8cqw 1.2cqw 1.2cqw .8cqw;overflow:hidden;
+  background:radial-gradient(circle at 100% 0,#1747d62e,transparent 30%),radial-gradient(circle at 0 100%,#1747d61f,transparent 26%),linear-gradient(90deg,transparent 0 9.2cqw,var(--margin) 9.2cqw calc(9.2cqw + 2px),transparent calc(9.2cqw + 2px)),
+  repeating-linear-gradient(180deg,var(--paper) 0 3.9cqw,var(--line) 3.9cqw calc(3.9cqw + 1px));
+  background-color:var(--paper);box-shadow:0 2cqw 5cqw rgba(0,0,0,.45)}
+.page.on{display:block;z-index:2}.page.under{display:block;z-index:1}
+.page::before{content:"";position:absolute;left:1.6cqw;top:0;bottom:0;width:3cqw;
+  background:radial-gradient(circle,#0c1530 0 .75cqw,#fff0 .8cqw) 0 0/3cqw 5.6cqw repeat-y}
+.inner{position:absolute;inset:0;padding:5cqw 5cqw 3.5cqw 12cqw;display:grid;grid-template-columns:1.4fr 1fr;grid-template-rows:minmax(0,1fr);gap:3cqw}
+.inner>div:first-child{align-self:center}
+.last .inner{padding-bottom:10.3cqw}
+h1,h2{font-family:'Caveat',cursive;color:var(--ink);line-height:1;position:relative;display:inline-block}
+h1{font-size:8cqw}h2{font-size:6cqw;margin-bottom:2.8cqw}
+.lead{font-size:2.3cqw;line-height:1.5;max-width:46cqw;font-weight:700}
+.sub{font-family:'Caveat',cursive;font-size:3.6cqw;color:var(--ink2);margin-top:1.5cqw}
+.who{margin-top:3cqw;font-size:1.7cqw;font-weight:800;border:.3cqw dashed var(--ink);display:inline-block;padding:.7cqw 1.6cqw;border-radius:1cqw;color:var(--ink2)}
+.list{display:grid;gap:1.5cqw}
+.it{border-left:.55cqw solid var(--ink);padding:.2cqw 0 .2cqw 1.6cqw;font-size:1.85cqw;line-height:1.35;background:linear-gradient(90deg,#ffffffb0,#fff0)}
+.it b{display:block;font-size:2.1cqw;color:var(--ink2);font-weight:800}
+.list.two{grid-template-columns:1fr 1fr}
+.it.bad{border-color:var(--red)}.it.good{border-color:var(--green)}
+.bar{height:1.6cqw;background:#e3e8f2;border-radius:2cqw;margin-top:.7cqw;overflow:hidden}
+.bar i{display:block;height:100%;width:var(--w);border-radius:2cqw;background:var(--c)}
+.enter .bar i{animation:grow 1.3s 1s both cubic-bezier(.2,.8,.2,1)}
+@keyframes grow{from{width:0}}
+/* texto escrito da esquerda para a direita */
+.w{clip-path:inset(-2cqw 100% -2cqw -2cqw)}
+.enter .w{animation:write .5s calc(var(--i)*.12s + .2s) both ease-out}
+@keyframes write{to{clip-path:inset(-2cqw -2cqw -2cqw -2cqw)}}
+/* foto sem moldura (PNG sem fundo) */
+.foto{align-self:stretch;min-height:0;position:relative;isolation:isolate;margin:-3.5cqw -5cqw -3cqw 0}
+.last .foto{margin-bottom:0}
+.foto::before{content:"";position:absolute;inset:14% -4% 2% -8%;z-index:-1;border-radius:52% 48% 42% 58%/56% 44% 56% 44%;background:radial-gradient(circle at 30% 25%,#f4f8ff,#bfd2ff);border:.35cqw dashed var(--ink);transform:rotate(var(--br,-4deg))}
+.enter .foto::before{animation:blob .9s .3s both cubic-bezier(.2,1.4,.4,1)}
+@keyframes blob{from{opacity:0;transform:scale(.4) rotate(-25deg)}to{opacity:1;transform:rotate(var(--br,-4deg))}}
+.foto.sem::before{display:none}
+.foto img{width:100%;height:100%;object-fit:contain;object-position:center bottom;opacity:0;filter:drop-shadow(0 1cqw 1.2cqw rgba(10,25,60,.28))}
+.enter .foto img{animation:rise .9s .5s both cubic-bezier(.2,1.3,.4,1)}
+@keyframes rise{from{opacity:0;transform:translateY(8cqw) scale(.85) rotate(-4deg)}to{opacity:1;transform:none}}
+body>canvas{position:fixed;inset:0;z-index:0;opacity:.4}.book,.ctl,#pgw{position:relative;z-index:1}
+.it{transition:transform .25s}.it:hover{transform:translateX(.8cqw)}
+.e{margin-right:.7cqw}
+.chars span{display:inline-block;opacity:0}.enter .chars span{animation:pop .7s calc(var(--k)*.06s + .2s) both cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{opacity:0;transform:translateY(4cqw) rotate(-12deg) scale(.6)}to{opacity:1;transform:none}}
+.team{display:flex;flex-wrap:wrap;gap:1.2cqw;margin-top:2.2cqw}
+.mem{display:flex;align-items:center;gap:.8cqw;background:#fff;border:.25cqw solid var(--line);border-radius:5cqw;padding:.5cqw 1.6cqw .5cqw .6cqw;font-weight:800;font-size:1.9cqw;box-shadow:0 .4cqw 1cqw #1747d633}
+.mem i{font-style:normal;width:3.4cqw;height:3.4cqw;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-family:Caveat,cursive;font-size:2.6cqw}
+.team.sm .mem{font-size:1.6cqw}.team.sm .mem i{width:2.8cqw;height:2.8cqw;font-size:2.2cqw}
+#pgw{width:min(96vw,520px);height:5px;background:#ffffff25;border-radius:5px}#pg{display:block;height:100%;background:#fff;border-radius:5px;transition:width .6s}
+/* decoração do tema caneta azul */
+.deco{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:hidden}
+.dd{fill:none;stroke:var(--ink);stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;opacity:.6;stroke-dasharray:1;stroke-dashoffset:1}
+.enter .dd{animation:traco .9s calc(var(--d)*.12s + .4s) forwards}
+@keyframes traco{to{stroke-dashoffset:0}}
+.dp{opacity:0;filter:drop-shadow(4px 6px 5px rgba(10,25,60,.3))}
+.enter .dp{animation:pin .6s .3s forwards}
+@keyframes pin{to{opacity:.95}}
+.fl{animation:fl 4s ease-in-out infinite alternate}
+@keyframes fl{to{transform:translateY(10px)}}
+.tag{font-family:'Caveat',cursive;font-weight:700;font-size:38px;fill:var(--ink);opacity:0}
+.enter .tag{animation:tagin .6s .5s forwards}
+@keyframes tagin{to{opacity:.8}}
+.wm{font-family:'Caveat',cursive;font-weight:700;font-size:190px;fill:var(--ink);opacity:.045}
+/* transição: caneta + corretivo */
+#tr{position:absolute;inset:0;width:100%;height:100%;z-index:30;pointer-events:none;display:none;border-radius:.8cqw 1.2cqw 1.2cqw .8cqw;overflow:hidden}
+#ti{fill:none;stroke:var(--ink);stroke-width:200;stroke-linejoin:miter}
+#tw{fill:none;stroke:#fffdf7;stroke-width:214;stroke-linejoin:miter;filter:drop-shadow(0 0 6px rgba(0,0,0,.12))}
+#tx text{font-family:'Caveat',cursive;font-weight:700;fill:var(--ink)}
+#tr .pen{filter:drop-shadow(4px 6px 5px rgba(10,25,60,.35))}
+/* caneta */
+.ov,.hand{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.ov{z-index:9}.hand{z-index:8}
+.ink{fill:none;stroke:var(--ink);stroke-linejoin:miter}
+.sk,.hand path{fill:none;stroke:var(--ink);stroke-linecap:round;stroke-linejoin:round}
+.hand path{stroke-width:7}
+.hand text{font-family:'Caveat',cursive;font-weight:700;fill:var(--ink)}
+.pen{opacity:0;transition:opacity .25s}
+.wp{transition:none;filter:drop-shadow(3px 4px 3px rgba(10,25,60,.3))}
+/* controles */
+.ctl{display:flex;align-items:center;gap:14px;color:#fff}
+.ctl button{font:800 15px 'Nunito',sans-serif;background:var(--ink);color:#fff;border:0;border-radius:30px;padding:10px 22px;cursor:pointer;box-shadow:0 4px 0 var(--ink2);transition:transform .15s}
+.ctl button:hover{transform:translateY(-2px)}.ctl button:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink2)}
+.ctl button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.dots{display:flex;gap:8px}.dots i{width:10px;height:10px;border-radius:50%;background:#ffffff40;transition:.3s}.dots i.a{background:#fff;transform:scale(1.4)}
+#n{font-weight:800;min-width:46px;text-align:center}
+@media(prefers-reduced-motion:reduce){.dd{stroke-dashoffset:0!important;animation:none!important}.dp{opacity:.95!important}.tag{opacity:.8!important}.fl{animation:none}.enter .w,.enter .bar i,.enter .foto img{animation-duration:.01s;animation-delay:0s}}
+</style>
+</head>
+<body>
+<canvas id="rain"></canvas>
+<svg width="0" height="0" style="position:absolute">
+<defs>
+<g id="penart"><g transform="rotate(38)"><path d="M0 0 L-9 -38 H9 Z" fill="#f2d9b3" stroke="#0b2a8f" stroke-width="3" stroke-linejoin="round"/><path d="M0 0 l-2.5-10 h5z" fill="#0b2a8f"/><rect x="-10" y="-150" width="20" height="112" rx="5" fill="#1747d6" stroke="#0b2a8f" stroke-width="3"/><rect x="-10" y="-62" width="20" height="14" fill="#0b2a8f"/><rect x="-10" y="-150" width="20" height="30" rx="5" fill="#0b2a8f"/><rect x="12" y="-138" width="4" height="66" rx="2" fill="#0b2a8f"/></g></g>
+<g id="corr"><g transform="rotate(38)"><path d="M0 0 L-12 -26 H12 Z" fill="#cfd6e6" stroke="#44506b" stroke-width="3" stroke-linejoin="round"/><rect x="-16" y="-120" width="32" height="96" rx="9" fill="#fff" stroke="#44506b" stroke-width="3"/><rect x="-16" y="-84" width="32" height="18" fill="#e5484d"/><rect x="-16" y="-120" width="32" height="26" rx="9" fill="#44506b"/><rect x="9" y="-108" width="4" height="60" rx="2" fill="#dfe6f5"/></g></g>
+</defs></svg>
+
+<main class="book" id="book">
+
+<section class="page cover">
+ <div class="inner"><div>
+  <h1 class="chars">Cibersegurança</h1>
+  <p class="sub w">como proteger a nossa vida digital</p>
+  <p class="lead w" style="margin-top:2.2cqw">Do celular ao computador: aprenda a se defender na internet com hábitos simples.</p>
+  <div class="team w"><div class="mem"><i style="--c:#1747d6">K</i>Kauan Gomes</div><div class="mem"><i style="--c:#1f9d62">P</i>Pedro</div><div class="mem"><i style="--c:#f08c1a">K</i>Kauã Miranda</div></div>
+  <span class="who w">Turma: 2º Tec</span>
+ </div><div class="foto"></div></div>
+</section>
+
+<section class="page">
+ <div class="inner"><div>
+  <h2 class="w">O que é cibersegurança?</h2>
+  <p class="lead w" style="margin-bottom:2.4cqw">É o conjunto de cuidados que protege computadores, celulares e contas contra pessoas mal-intencionadas.</p>
+  <div class="list">
+   <div class="it w"><b>Dados pessoais</b>Nome, fotos, CPF e endereço precisam ficar seguros.</div>
+   <div class="it w"><b>Dispositivos</b>Celular, notebook e tablet devem estar sempre protegidos.</div>
+   <div class="it w"><b>Contas online</b>Redes sociais, e-mail e jogos têm dono: você!</div>
+  </div>
+ </div><div class="foto"></div></div>
+</section>
+
+<section class="page">
+ <div class="inner"><div>
+  <h2 class="w">Principais ameaças</h2>
+  <div class="list two">
+   <div class="it bad w"><b><span class="e">🦠</span>Vírus e malware</b>Programas que danificam ou espionam o aparelho.</div>
+   <div class="it bad w"><b><span class="e">🎣</span>Phishing</b>Mensagens falsas que tentam enganar você.</div>
+   <div class="it bad w"><b><span class="e">🔑</span>Roubo de senhas</b>Quando alguém descobre ou adivinha seu acesso.</div>
+   <div class="it bad w"><b><span class="e">📶</span>Wi-Fi falso</b>Redes abertas que podem espionar o que você faz.</div>
+  </div>
+  <p class="sub w" style="margin-top:2.4cqw">Quem conhece o perigo, se protege melhor!</p>
+ </div><div class="foto"></div></div>
+</section>
+
+<section class="page">
+ <div class="inner"><div>
+  <h2 class="w">Senhas fortes</h2>
+  <div class="list">
+   <div class="it bad w"><b>Fraca: 123456</b><div class="bar"><i style="--w:12%;--c:var(--red)"></i></div></div>
+   <div class="it good w"><b>Forte: Gato-Azul&amp;Lua#2026</b><div class="bar"><i style="--w:96%;--c:var(--green)"></i></div></div>
+  </div>
+  <div class="list" style="margin-top:2cqw">
+   <div class="it w">Use <b style="display:inline">12 letras ou mais</b>, com números e símbolos.</div>
+   <div class="it w">Nunca use nome, aniversário ou a mesma senha em vários sites.</div>
+   <div class="it w">Dica: crie uma frase-senha que só você entende.</div>
+  </div>
+ </div><div class="foto"></div></div>
+</section>
+
+<section class="page">
+ <div class="inner"><div>
+  <h2 class="w">Cuidado com golpes</h2>
+  <p class="lead w" style="margin-bottom:2cqw">No phishing, o golpista joga uma “isca” e espera você cair. Desconfie quando:</p>
+  <div class="list">
+   <div class="it bad w"><b><span class="e">🔗</span>O link é estranho</b>O endereço não parece o do site oficial.</div>
+   <div class="it bad w"><b><span class="e">⏰</span>Tem muita pressa</b>“Clique agora ou perderá sua conta!”</div>
+   <div class="it bad w"><b><span class="e">🕵️</span>Pedem sua senha</b>Empresas sérias nunca pedem senha por mensagem.</div>
+  </div>
+ </div><div class="foto"></div></div>
+</section>
+
+<section class="page">
+ <div class="inner"><div>
+  <h2 class="w">Privacidade nas redes</h2>
+  <div class="list">
+   <div class="it good w"><b><span class="e">🔒</span>Perfil privado</b>Só aceite quem você conhece de verdade.</div>
+   <div class="it bad w"><b><span class="e">📍</span>Não poste sua rotina</b>Evite mostrar endereço, escola e horários.</div>
+   <div class="it bad w"><b><span class="e">💬</span>Cyberbullying</b>Não compartilhe, bloqueie e conte a um adulto.</div>
+  </div>
+ </div><div class="foto"></div></div>
+</section>
+
+<section class="page">
+ <div class="inner"><div>
+  <h2 class="w">Como se proteger</h2>
+  <div class="list two">
+   <div class="it good w"><b><span class="e">🔐</span>Verificação em 2 etapas</b>Um código extra protege a conta.</div>
+   <div class="it good w"><b><span class="e">🔄</span>Atualizações</b>Mantenha o sistema e os apps em dia.</div>
+   <div class="it good w"><b><span class="e">🛡️</span>Antivírus</b>Ele ajuda a barrar programas perigosos.</div>
+   <div class="it good w"><b><span class="e">🤔</span>Pense antes de clicar</b>Na dúvida, não abra o link.</div>
+   <div class="it good w"><b><span class="e">💾</span>Backup</b>Guarde cópias de arquivos importantes.</div>
+   <div class="it good w"><b><span class="e">🧑‍🏫</span>Fale com um adulto</b>Se algo parecer estranho, peça ajuda.</div>
+  </div>
+ </div><div class="foto"></div></div>
+</section>
+
+<section class="page last">
+ <div class="inner"><div>
+  <h2 class="w">Conclusão</h2>
+  <p class="lead w" style="font-size:2.1cqw">Segurança digital não é só tecnologia: é hábito. Senha forte, atenção aos golpes e atualizações em dia já protegem muito.</p>
+  <p class="sub w" style="font-size:4.4cqw;margin-top:1.2cqw">Pense antes de clicar!</p>
+  <div class="team sm w"><div class="mem"><i style="--c:#1747d6">K</i>Kauan Gomes</div><div class="mem"><i style="--c:#1f9d62">P</i>Pedro</div><div class="mem"><i style="--c:#f08c1a">K</i>Kauã Miranda</div></div>
+  <p class="lead w" style="margin-top:1.4cqw;font-size:2.1cqw">Turma 2º Tec · Obrigado pela atenção!</p>
+ </div><div class="foto"></div></div>
+ <!-- espaço em branco onde a caneta escreve a frase final -->
+ <svg class="hand" viewBox="0 0 1600 900"><defs><clipPath id="hc"><rect x="0" y="0" width="0" height="0"/></clipPath></defs>
+  <text x="200" y="838" font-size="96" clip-path="url(#hc)">Caneta azul, azul caneta</text>
+  <path class="u"/><path class="st"/><g class="pen"><use href="#penart"/></g></svg>
+</section>
+
+<svg id="tr" viewBox="0 0 1600 900"><path id="ti"/><path id="tw"/><g id="tx"></g><g id="tp" class="pen"><use href="#penart"/></g><g id="tc" class="pen"><use href="#corr"/></g></svg>
+</main>
+
+<div id="pgw"><i id="pg"></i></div>
+<div class="ctl">
+ <button id="prev" aria-label="Slide anterior">◀ Anterior</button>
+ <div class="dots" id="dots"></div><span id="n"></span>
+ <button id="next" aria-label="Próximo slide">Próximo ▶</button>
+</div>
+
+<!-- música do último slide (só o áudio do vídeo vidio1) -->
+<audio id="musica" src="vidio1.mp4" preload="auto" loop></audio>
+
+<script>
+/* ============ SUAS FOTOS (sem fundo, na mesma pasta deste arquivo) ============
+   Uma foto por slide, na ordem. Pode escrever só o nome (foto1) que o código
+   procura sozinho foto1.png, .webp, .jpg ou .jpeg. Se renomear a foto, é só trocar
+   o nome aqui (pode usar com extensão: "manuel-gomes.png"). Deixe "" para um
+   slide ficar sem foto. */
+const FOTOS=[
+  "foto1", // 1 - capa
+  "foto2", // 2 - O que é cibersegurança
+  "foto3", // 3 - Ameaças
+  "foto4", // 4 - Senhas
+  "foto5", // 5 - Golpes
+  "foto6", // 6 - Privacidade
+  "foto7", // 7 - Como se proteger
+  "foto8"  // 8 - Conclusão
+];
+/* ============================================================================= */
+const pages=[...document.querySelectorAll('.page')],dots=document.getElementById('dots'),num=document.getElementById('n');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const NS='http://www.w3.org/2000/svg';
+let cur=0,busy=false,token=0,last=-1;
+
+function loadFoto(box,name){
+  if(!name){box.classList.add('sem');return}
+  const list=/\.\w{2,5}$/.test(name)?[name]:['png','webp','jpg','jpeg'].map(e=>name+'.'+e);
+  const im=new Image();let k=0;im.alt='Foto de Manuel Gomes';
+  im.onerror=()=>{k++;k<list.length?im.src=list[k]:(im.remove(),box.classList.add('sem'))};
+  im.src=list[0];box.append(im);
+}
+
+/* ===== trajetos da caneta na transição (área 1600x900) ===== */
+const ys=[60,210,360,510,660,810],xs=Array.from({length:11},(_,i)=>60+i*150);
+const snakeH=(Y,l2r)=>Y.map((y,i)=>{const a=(i%2===0)===l2r?-100:1700,b=a===-100?1700:-100;return(i?`V${y}`:`M${a} ${y}`)+`H${b}`}).join('');
+const snakeV=(X,t2b)=>X.map((x,i)=>{const a=(i%2===0)===t2b?-100:1000,b=a===-100?1000:-100;return(i?`H${x}`:`M${x} ${a}`)+`V${b}`}).join('');
+const diag=()=>Array.from({length:15},(_,i)=>`${i?'L':'M'}${i%2?1700:-100} ${-100+i*1100/14}`).join('');
+const sp=[[0,100],[1500,100],[1500,800],[100,800],[100,300],[1300,300],[1300,600],[300,600],[300,450],[1200,450]];
+const spiral=r=>(r?[...sp].reverse():sp).map((p,i)=>`${i?'L':'M'}${p[0]} ${p[1]}`).join('');
+const wavy=Y=>Y.map((y,i)=>{const r=i%2===0,x0=r?-100:1700,x1=r?1700:-100,d=x1-x0;
+  return(i?`V${y}`:`M${x0} ${y}`)+`C${x0+d*.2} ${y-90} ${x0+d*.4} ${y+90} ${x0+d*.6} ${y}S${x0+d*.85} ${y+90} ${x1} ${y}`}).join('');
+const PAT=[
+  ()=>snakeH(ys,true),            // de lado, de cima para baixo
+  ()=>snakeH([...ys].reverse(),false), // de baixo para cima
+  ()=>snakeV(xs,true),            // colunas, da esquerda para a direita
+  ()=>snakeV([...xs].reverse(),false), // colunas, da direita para a esquerda
+  diag,                           // zigue-zague de canto a canto
+  ()=>spiral(false),              // espiral de fora para dentro
+  ()=>spiral(true),               // espiral do centro para fora
+  ()=>wavy(ys)                    // ondinhas
+];
+function pick(){let k;do k=Math.floor(Math.random()*PAT.length);while(k===last);last=k;return PAT[k]()}
+
+let dn=0;
+const P=(d,x,y,r=0,k=1)=>`<path class="dd" pathLength="1" style="--d:${dn++}" transform="translate(${x} ${y}) rotate(${r}) scale(${k})" d="${d}"/>`;
+const STAR='M0 -20L6 -6L21 -6L9 3L13 18L0 9L-13 18L-9 3L-21 -6L-6 -6Z',SQ='M0 0q10-16 20 0t20 0t20 0t20 0t20 0',AR='M0 0C30 -22 62 -22 92 0M70 -14L93 1L66 9',SP='M0 -16V16M-16 0H16M-11 -11L11 11M11 -11L-11 11',LOOP='M0 0c20-30 50-10 30 10s-40-10-10-30 60 0 90 -10';
+const pen=(x,y,r,k,d)=>`<g class="fl" style="animation-delay:${d*-.9}s"><use href="#penart" class="dp" transform="translate(${x} ${y}) rotate(${r}) scale(${k})"/></g>`;
+const blot=(x,y)=>`<g fill="#1747d6" opacity=".75"><circle cx="${x}" cy="${y}" r="9"/><circle cx="${x+24}" cy="${y-12}" r="5"/><circle cx="${x-18}" cy="${y-20}" r="4"/><circle cx="${x+10}" cy="${y+22}" r="3"/></g>`;
+function deco(i,last){
+  dn=0;const v=i%3,tags=['proteja seus dados!','pense antes de clicar ✎','fique esperto!'];
+  const lay=[
+   [pen(1470,150,0,1.9,0),pen(150,820,180,1.5,1),P(STAR,760,40,-8,.8),P(SQ,980,32),P(SP,1210,42),P(STAR,112,290,8,.7),P(SP,112,520),P(SQ,100,650,90,.8),blot(190,870)],
+   [pen(1520,120,0,1.7,0),pen(150,850,180,1.8,2),P(SP,760,40),P(STAR,960,40,10,.8),P(SQ,1130,30),P(AR,60,330,90,.6),P(STAR,112,560,-12,.7),P(LOOP,40,700,60,.6),blot(215,880)],
+   [pen(1400,170,0,2.1,1),pen(140,790,180,1.3,0),P(SQ,780,34),P(STAR,1010,42,0,.9),P(SP,1200,40),P(STAR,112,260,-6,.8),P(SQ,108,600,90,.7),P(SP,112,760),blot(170,845)]
+  ][v];
+  const wm='';
+  return `<svg class="deco" viewBox="0 0 1600 900">${wm}${lay.join('')}<text class="tag" x="215" y="52" transform="rotate(-2 700 50)">${tags[v]}</text></svg>`;
+}
+pages.forEach((p,i)=>{
+  p.insertAdjacentHTML('afterbegin',deco(i,i===pages.length-1));
+  p.querySelector('.foto').style.setProperty('--br',[-4,3,-2][i%3]+'deg');
+  p.insertAdjacentHTML('beforeend','<svg class="ov" viewBox="0 0 1600 900"><path class="ink"/><g class="fx"></g><g class="pen"><use href="#penart"/></g><g class="pen wp"><use href="#penart"/></g></svg>');
+  loadFoto(p.querySelector('.foto'),FOTOS[i]);
+  p.querySelectorAll('.w').forEach((el,k)=>el.style.setProperty('--i',k));
+  dots.insertAdjacentHTML('beforeend','<i></i>');
+});
+
+function mark(n){document.getElementById('pg').style.width=((n+1)/pages.length*100)+'%';[...dots.children].forEach((d,i)=>d.classList.toggle('a',i===n));num.textContent=(n+1)+' / '+pages.length}
+function enter(p){p.classList.remove('enter');void p.offsetWidth;p.classList.add('enter')}
+function cleanup(p){
+  const k=p.querySelector('svg.ov .ink');
+  if(k.getAttribute('d')){const L=k.getTotalLength();k.style.strokeDasharray=L;k.style.strokeDashoffset=L}
+  p.querySelector('.fx').replaceChildren();
+  const h=p.querySelector('.hand');
+  if(h){h.querySelector('rect').setAttribute('width',0);h.querySelectorAll('.u,.st').forEach(e=>e.setAttribute('d',''));h.querySelector('.pen').style.opacity=0}
+}
+
+/* ===== transições (4 estilos, sorteados) ===== */
+const VELOCIDADE=1; // 1 = padrão | 1.5 = mais rápido | 0.7 = mais lento
+const $=q=>document.querySelector(q),clamp=(v,a,b)=>Math.min(b,Math.max(a,v)),easeIO=k=>.5-Math.cos(Math.PI*k)/2,easeO=k=>1-Math.pow(1-k,3);
+const put=(el,x,y,r=0,k=1)=>el.setAttribute('transform',`translate(${x} ${y}) rotate(${r}) scale(${k})`);
+const PEN='<g class="pen" style="opacity:1"><use href="#penart"/></g>';
+function anim(D,fn){return new Promise(res=>{const t0=performance.now();(function f(now){const p=clamp((now-t0)/(D/VELOCIDADE),0,1);fn(p);p<1?requestAnimationFrame(f):res()})(t0)})}
+
+/* 1. rabisco rápido + corretivo */
+async function tRabisco(troca){
+  const ti=$('#ti'),tw=$('#tw'),d=pick();
+  ti.setAttribute('d',d);tw.setAttribute('d',d);
+  const L=ti.getTotalLength();
+  [ti,tw].forEach(e=>{e.style.strokeDasharray=L;e.style.strokeDashoffset=L});
+  const pass=(path,tool,D,k0)=>{tool.style.opacity=1;return anim(D,p=>{const k=easeIO(p),pt=path.getPointAtLength(L*k),w=Math.sin(k*L/30);path.style.strokeDashoffset=L*(1-k);put(tool,pt.x+w*5,pt.y+Math.cos(k*L/30)*5,w*6,k0)}).then(()=>{tool.style.opacity=0})};
+  await pass(ti,$('#tp'),clamp(L/8,900,1500),1.7);
+  await pass(tw,$('#tc'),clamp(L/14,600,1000),1.5);
+  troca();
+}
+/* 2. cortina: 8 canetas escrevem juntas e 8 corretivos apagam */
+async function tCortina(troca){
+  const tx=$('#tx'),L=940;let h='';
+  for(let i=0;i<8;i++){const x=100+200*i;h+=`<path style="fill:none;stroke:var(--ink);stroke-width:204" d="${i%2?`M${x} 920V-20`:`M${x} -20V920`}"/>`+PEN}
+  tx.innerHTML=h;
+  const cols=[...tx.querySelectorAll('path')],pens=[...tx.querySelectorAll('.pen')];
+  cols.forEach(c=>{c.style.strokeDasharray=L+' '+L;c.style.strokeDashoffset=L});
+  const pass=erase=>anim(1000,p=>cols.forEach((c,i)=>{
+    const k=easeIO(clamp((p*1000-i*60)/520,0,1)),pt=c.getPointAtLength(L*k);
+    c.style.strokeDashoffset=erase?-L*k:L*(1-k);
+    put(pens[i],pt.x,pt.y,Math.sin(k*18+i)*6,1.4);
+    pens[i].style.opacity=k>0&&k<1?1:0;
+  }));
+  await pass(false);troca();
+  pens.forEach(p=>p.firstElementChild.setAttribute('href','#corr'));
+  await pass(true);return true;
+}
+/* 3. gota de tinta que espirra e depois é coberta pelo corretivo */
+async function tGota(troca){
+  const tx=$('#tx'),cx=500+Math.random()*600,cy=280+Math.random()*340,R=1250;
+  const dots=Array.from({length:14},()=>({a:Math.random()*6.283,d:30+Math.random()*160,r:5+Math.random()*15}));
+  tx.innerHTML=PEN+PEN.replace('#penart','#corr')+'<circle r="0" fill="var(--ink)"/>'+dots.map(()=>'<circle r="0" fill="var(--ink)"/>').join('')+'<circle r="0" fill="#fffdf7"/>';
+  const [pen,tool]=tx.querySelectorAll('.pen'),cs=[...tx.querySelectorAll('circle')],main=cs[0],white=cs[cs.length-1],dc=cs.slice(1,-1);
+  tool.style.opacity=0;put(pen,cx+34,cy-270,0,1.7);
+  main.setAttribute('r',13);
+  await anim(380,p=>{const k=p*p;main.setAttribute('cx',cx+34-34*k);main.setAttribute('cy',cy-270+270*k)});
+  pen.style.opacity=0;
+  await anim(650,p=>{const r=13+R*easeO(p);main.setAttribute('r',r);dc.forEach((c,i)=>{const o=dots[i],rr=r*(.55+.45*easeO(p))+o.d;c.setAttribute('cx',cx+Math.cos(o.a)*rr);c.setAttribute('cy',cy+Math.sin(o.a)*rr);c.setAttribute('r',o.r*(1+p*1.5))})});
+  put(tool,cx+30,cy+20,0,1.6);tool.style.opacity=1;white.setAttribute('cx',cx);white.setAttribute('cy',cy);
+  await anim(600,p=>white.setAttribute('r',R*1.2*easeIO(p)));
+  tool.style.opacity=0;troca();
+}
+/* 4. bolinhas de tinta cobrem a tela e depois somem */
+async function tBolinhas(troca){
+  const tx=$('#tx'),cols=8,rows=5,cw=1600/cols,ch=900/rows;
+  let h='';
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)
+    h+=`<circle cx="${c*cw+cw/2}" cy="${r*ch+ch/2}" r="0" fill="var(--ink)"/>`;
+  tx.innerHTML=h;
+  const cs=[...tx.querySelectorAll('circle')],R=Math.hypot(cw,ch)/2*1.08;
+  const pass=out=>anim(850,p=>cs.forEach((c,i)=>{
+    const col=i%cols,row=Math.floor(i/cols),delay=(col+row)/(cols+rows-2)*.5;
+    const k=easeO(clamp((p-delay)/.5,0,1));
+    c.setAttribute('r',R*(out?1-k:k));
+  }));
+  await pass(false);troca();
+  await pass(true);return true;
+}
+const TRANS=[tRabisco,tCortina,tGota,tBolinhas];let lastT=-1;
+async function transicao(troca){
+  const tr=$('#tr'),tx=$('#tx');
+  let k;do k=Math.floor(Math.random()*TRANS.length);while(k===lastT);lastT=k;
+  $('#ti').setAttribute('d','');$('#tw').setAttribute('d','');tx.innerHTML='';
+  tr.style.transition='none';tr.style.opacity=1;tr.style.display='block';void tr.offsetWidth;
+  const pronto=await TRANS[k](troca);
+  if(!pronto){tr.style.transition='opacity .35s';tr.style.opacity=0;await sleep(380)}
+  tr.style.display='none';tx.innerHTML='';
+}
+
+/* a caneta traça um caminho de verdade (sublinhado, ✓, ✗, estrela...) */
+function trace(path,pen,dur,sc,my){
+  return new Promise(res=>{
+    const L=path.getTotalLength(),t0=performance.now();
+    path.style.strokeDasharray=L;path.style.strokeDashoffset=L;pen.style.opacity=1;
+    (function st(now){
+      if(my!==token){pen.style.opacity=0;return res()}
+      const e=Math.min(1,(now-t0)/dur),pt=path.getPointAtLength(L*e);
+      path.style.strokeDashoffset=L*(1-e);
+      pen.setAttribute('transform',`translate(${pt.x} ${pt.y}) scale(${sc})`);
+      e<1?requestAnimationFrame(st):(pen.style.opacity=0,res());
+    })(t0);
+  });
+}
+function penDraw(p,d,o={}){
+  const my=token,ov=p.querySelector('svg.ov'),path=document.createElementNS(NS,'path');
+  path.setAttribute('d',d);path.setAttribute('class','sk');
+  path.style.stroke=o.color||'var(--ink)';path.style.strokeWidth=o.w||7;
+  ov.querySelector('.fx').appendChild(path);
+  return trace(path,ov.querySelector('.pen'),reduce?10:(o.dur||1100),1.1,my).then(()=>path);
+}
+function vb(p,el){const a=p.getBoundingClientRect(),b=el.getBoundingClientRect(),s=1600/a.width;return{x:(b.left-a.left)*s,y:(b.top-a.top)*s,w:b.width*s,h:b.height*s}}
+function underline(p,h,i){
+  const b=vb(p,h),x=b.x,w=b.w,y=b.y+b.h+4,cx=x+w+50,cy=b.y+b.h*.35,s=28,wave=`M${x} ${y}Q${x+w*.1} ${y-18} ${x+w*.2} ${y}T${x+w*.4} ${y}T${x+w*.6} ${y}T${x+w*.8} ${y}T${x+w} ${y}`;
+  const styles=[
+    wave,
+    `M${x} ${y}C${x+w*.3} ${y-8} ${x+w*.7} ${y+8} ${x+w} ${y-4}M${x+w*.08} ${y+18}C${x+w*.4} ${y+10} ${x+w*.7} ${y+26} ${x+w*.94} ${y+14}`,
+    wave+`M${cx} ${cy-s}L${cx+s*.25} ${cy-s*.25}L${cx+s} ${cy}L${cx+s*.25} ${cy+s*.25}L${cx} ${cy+s}L${cx-s*.25} ${cy+s*.25}L${cx-s} ${cy}L${cx-s*.25} ${cy-s*.25}Z`
+  ];
+  return penDraw(p,styles[i%3],{dur:1300});
+}
+/* no último slide a caneta escreve a frase num espaço em branco */
+async function writePhrase(p){
+  const my=token,h=p.querySelector('.hand'),tx=h.querySelector('text'),r=h.querySelector('rect'),pen=h.querySelector('.pen'),u=h.querySelector('.u'),st=h.querySelector('.st');
+  await document.fonts.ready;if(my!==token)return;
+  const b=tx.getBBox();r.setAttribute('x',b.x-10);r.setAttribute('y',b.y-20);r.setAttribute('height',b.height+40);
+  const D=reduce?10:2800,t0=performance.now();pen.style.opacity=1;
+  await new Promise(res=>(function f(now){
+    if(my!==token)return res();
+    const e=Math.min(1,(now-t0)/D);
+    r.setAttribute('width',e*b.width+20);
+    pen.setAttribute('transform',`translate(${b.x+e*b.width} ${b.y+b.height*.62+Math.sin(e*b.width/18)*b.height*.2}) scale(1.3)`);
+    e<1?requestAnimationFrame(f):res();
+  })(t0));
+  if(my!==token)return;
+  const yb=b.y+b.height+8,ex=b.x+b.width,cx=ex+70,cy=b.y+b.height*.3,s=38;
+  u.setAttribute('d',`M${b.x} ${yb}C${b.x+b.width*.3} ${yb+22} ${b.x+b.width*.65} ${yb-14} ${ex+10} ${yb-6}`);
+  st.setAttribute('d',`M${cx} ${cy-s}L${cx+s*.25} ${cy-s*.25}L${cx+s} ${cy}L${cx+s*.25} ${cy+s*.25}L${cx} ${cy+s}L${cx-s*.25} ${cy+s*.25}L${cx-s} ${cy}L${cx-s*.25} ${cy-s*.25}Z`);
+  await trace(u,pen,reduce?10:900,1.3,my);
+  await trace(st,pen,reduce?10:700,1.3,my);
+}
+/* caneta escrevendo junto com o texto, bem rápida */
+function penEscreve(p){
+  const my=token;
+  if(reduce)return sleep(50);
+  const pen=p.querySelector('svg.ov .wp');
+  const items=[...p.querySelectorAll('.w,.chars')].map(el=>{
+    const ch=el.classList.contains('chars'),i=+el.style.getPropertyValue('--i')||0;
+    return{r:vb(p,el),s:ch?200:200+i*120,d:ch?el.children.length*60+500:500};
+  });
+  const end=Math.max(...items.map(x=>x.s+x.d)),t0=performance.now();
+  return new Promise(res=>(function f(now){
+    if(my!==token){pen.style.opacity=0;return res()}
+    const t=now-t0;let a=null;
+    for(const it of items)if(t>=it.s&&t<it.s+it.d)a=it;
+    if(a){
+      const e=1-Math.pow(1-(t-a.s)/a.d,1.8),r=a.r;
+      pen.style.opacity=1;
+      pen.setAttribute('transform',`translate(${r.x+e*r.w} ${r.y+r.h*(.5+.36*Math.sin(e*r.w/38))+8}) rotate(${Math.sin(t/60)*5}) scale(1.15)`);
+    }
+    t<end?requestAnimationFrame(f):(pen.style.opacity=0,res());
+  })(t0));
+}
+async function afterEnter(n){
+  const p=pages[n],my=token;
+  await document.fonts.ready;await penEscreve(p);await sleep(200);if(my!==token)return;
+  const h=p.querySelector('h1,h2');
+  if(h)await underline(p,h,n);
+  if(my!==token)return;
+  if(n===pages.length-1){await sleep(400);if(my===token)writePhrase(p)}
+}
+
+async function go(n){
+  if(busy||n<0||n>=pages.length||n===cur)return;
+  busy=true;token++;mark(n);
+  /* música: toca só no último slide */
+  const mu=document.getElementById('musica');
+  if(n===pages.length-1){mu.currentTime=0;mu.play().catch(()=>{})}else{mu.pause()}
+  const c=pages[cur],t=pages[n];
+  const troca=()=>{c.classList.remove('on');t.classList.add('on');cleanup(c);cleanup(t)};
+  if(reduce)troca();else await transicao(troca);
+  cur=n;enter(t);busy=false;afterEnter(n);
+}
+document.getElementById('next').onclick=()=>go(cur+1);
+document.getElementById('prev').onclick=()=>go(cur-1);
+addEventListener('keydown',e=>{
+  if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();go(cur+1)}
+  if(['ArrowLeft','PageUp'].includes(e.key))go(cur-1);
+});
+let sx=null;
+addEventListener('touchstart',e=>sx=e.touches[0].clientX);
+addEventListener('touchend',e=>{if(sx===null)return;const d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>50)go(cur+(d<0?1:-1));sx=null});
+document.querySelectorAll('.chars').forEach(h=>h.innerHTML=[...h.textContent].map((c,k)=>`<span style="--k:${k}">${c}</span>`).join(''));
+
+/* chuva de 0 e 1 no fundo */
+const cv=document.getElementById('rain'),cx=cv.getContext('2d');let drops;
+function rs(){cv.width=innerWidth;cv.height=innerHeight;drops=Array.from({length:Math.ceil(cv.width/22)},()=>Math.random()*-50)}
+rs();addEventListener('resize',rs);
+if(!reduce)setInterval(()=>{cx.fillStyle='rgba(20,33,61,.12)';cx.fillRect(0,0,cv.width,cv.height);cx.fillStyle='#5b8cff';cx.font='16px monospace';drops.forEach((y,i)=>{cx.fillText(Math.random()<.5?'0':'1',i*22,y*20);drops[i]=y*20>cv.height&&Math.random()>.97?0:y+1})},70);
+
+pages.forEach(cleanup);
+pages[0].classList.add('on');mark(0);document.fonts.ready.then(()=>{enter(pages[0]);afterEnter(0)});
+</script>
+</body>
+</html>
